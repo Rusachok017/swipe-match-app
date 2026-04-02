@@ -1,13 +1,14 @@
+# ==========================================
+# backend/database.py
+# Подключение к PostgreSQL
+# ==========================================
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-import os
-from dotenv import load_dotenv
 
-# Загружаем переменные из .env
-load_dotenv()
-
-DATABASE_URL = os.getenv("DATABASE_URL")
+# Строка подключения к локальной PostgreSQL
+DATABASE_URL = "postgresql://postgres:Leva__2288@localhost:5432/swipe_match_db"
 
 # Создаем движок подключения
 engine = create_engine(DATABASE_URL)
@@ -18,7 +19,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Базовый класс для моделей
 Base = declarative_base()
 
-# Функция для получения сессии
+# Функция для получения сессии (используется в FastAPI)
 def get_db():
     db = SessionLocal()
     try:
