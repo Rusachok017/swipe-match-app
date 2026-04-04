@@ -1,30 +1,21 @@
-# ==========================================
-# backend/main.py
-# FastAPI приложение (Базовая версия)
-# ==========================================
-
-# --- ИМПОРТЫ ---
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from fastapi.security import OAuth2PasswordRequestForm
+from datetime import timedelta
+import auth
 from typing import List
-
-# Импорт наших локальных модулей
 import models
 import database
 
-# --- СОЗДАНИЕ ТАБЛИЦ ---
-# Создаем таблицы в БД при запуске, если их нет
 models.Base.metadata.create_all(bind=database.engine)
 
-# --- НАСТРОЙКА FASTAPI ---
 app = FastAPI(
     title="Swipe Match API",
-    description="API для приложения знакомств (Курсовой проект)",
+    description="API для приложения знакомств",
     version="1.0.0"
 )
 
-# --- CORS (Разрешаем запросы с фронтенда) ---
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -37,41 +28,33 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ==========================================
-# ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-# ==========================================
 
 def get_db():
-    """Зависимость FastAPI для получения сессии БД"""
     db = database.SessionLocal()
     try:
         yield db
     finally:
         db.close()
 
-# ==========================================
-# API ЭНДПОИНТЫ
-# ==========================================
 
-# --- 1. Проверка работы сервера ---
+
+# Проверка работы сервера
 @app.get("/")
 def read_root():
     return {
-        "message": "✅ Swipe Match API работает!", 
+        "message": "Swipe Match API работает", 
         "status": "ok",
         "version": "1.0.0"
     }
 
-# --- 2. Проверка здоровья (БД) ---
+# Проверка здоровья
 @app.get("/api/health")
 def health_check():
-    """Проверяет подключение к базе данных"""
     return {"status": "ok", "database": "connected"}
 
-# --- 3. Получить всех пользователей (Для тестов) ---
+# Получить всех пользователей 
 @app.get("/api/users")
 def get_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """Возвращает список всех пользователей"""
     users = db.query(models.User).offset(skip).limit(limit).all()
     
     return [
@@ -86,19 +69,16 @@ def get_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
         for user in users
     ]
 
-# --- 4. Получить кандидатов для свайпа (Основная лента) ---
+#Получить кандидатов для свайпа
 @app.get("/api/candidates")
 def get_candidates(
     current_user_id: int = 1, 
     limit: int = 10, 
     db: Session = Depends(get_db)
 ):
-    """
-    Возвращает пользователей для показа в ленте.
-    Исключает: самого пользователя и тех, кого уже свайпнули.
-    """
+
     
-    # Получаем ID тех, кого пользователь уже видел (свайпал)
+    # Получаем ID тех, кого пользователь уже видел 
     swiped_ids = db.query(models.Swipe.swiped_id).filter(
         models.Swipe.swiper_id == current_user_id
     ).all()
@@ -109,14 +89,11 @@ def get_candidates(
         models.User.id != current_user_id  # Не показывать самого себя
     )
     
-    # Исключаем уже просмотренных
+    # Исключаем просмотренных
     if swiped_ids:
         query = query.filter(~models.User.id.in_(swiped_ids))
     
-    # Выполняем запрос с ограничением
     candidates = query.limit(limit).all()
-    
-    # Возвращаем результат
     return [
         {
             "id": user.id,
@@ -129,7 +106,7 @@ def get_candidates(
         for user in candidates
     ]
 
-# --- 5. Сделать свайп (Лайк / Дизлайк) ---
+# Сделать свайп
 @app.post("/api/swipe")
 def make_swipe(
     swiper_id: int, 
@@ -137,12 +114,7 @@ def make_swipe(
     is_like: bool, 
     db: Session = Depends(get_db)
 ):
-    """
-    Сохраняет действие свайпа.
-    Если это лайк и он взаимный -> возвращает is_match: True
-    """
-    
-    # Создаем запись о свайпе
+
     new_swipe = models.Swipe(
         swiper_id=swiper_id,
         swiped_id=swiped_id,
@@ -152,10 +124,8 @@ def make_swipe(
     db.add(new_swipe)
     db.commit()
     
-    # Логика проверки Мэтча (только если это лайк)
     is_match = False
     if is_like:
-        # Проверяем, лайкнул ли этот человек нас в ответ
         mutual_like = db.query(models.Swipe).filter(
             models.Swipe.swiper_id == swiped_id,
             models.Swipe.swiped_id == swiper_id,
@@ -172,9 +142,76 @@ def make_swipe(
         "message": "Match!" if is_match else "Swipe saved"
     }
 
-# ==========================================
-# ЗАПУСК СЕРВЕРА
-# ==========================================
+@app.post("/api/auth/register")
+def register(username: str, password: str, age: int, gender: str, bio: str = "", db: Session = Depends(database.get_db)):
+    """Регистрация нового пользователя"""
+    
+    # Проверка, что пользователь не существует
+    existing_user = db.query(models.User).filter(models.User.username == username).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Пользователь уже существует")
+    
+    # Создаём пользователя
+    new_user = models.User(
+        username=username,
+        password=auth.get_password_hash(password),
+        age=age,
+        gender=gender,
+        bio=bio,
+        photo_url=f"https://i.pravatar.cc/150?img={hash(username) % 50}"
+    )
+    
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    # Создаём токен
+    access_token = auth.create_access_token(
+        data={"sub": new_user.username},
+        expires_delta=timedelta(minutes=30)
+    )
+    
+    return {
+        "status": "success",
+        "user_id": new_user.id,
+        "username": new_user.username,
+        "token": access_token
+    }
+
+@app.post("/api/auth/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
+    """Вход пользователя"""
+    
+    user = db.query(models.User).filter(models.User.username == form_data.username).first()
+    
+    if not user or not auth.verify_password(form_data.password, user.password):
+        raise HTTPException(status_code=400, detail="Неверный логин или пароль")
+    
+    # Создаём токен
+    access_token = auth.create_access_token(
+        data={"sub": user.username},
+        expires_delta=timedelta(minutes=30)
+    )
+    
+    return {
+        "status": "success",
+        "user_id": user.id,
+        "username": user.username,
+        "token": access_token
+    }
+
+@app.get("/api/auth/me")
+def get_me(current_user: models.User = Depends(auth.get_current_user)):
+    """Получить данные текущего пользователя"""
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "age": current_user.age,
+        "gender": current_user.gender,
+        "bio": current_user.bio,
+        "photo_url": current_user.photo_url
+    }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)

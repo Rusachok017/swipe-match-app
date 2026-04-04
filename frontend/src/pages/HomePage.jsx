@@ -1,41 +1,35 @@
-import { useState, useEffect } from 'react'
-import { api } from '../services/api'
+const [currentUserId, setCurrentUserId] = useState(1)
 
-function HomePage() {
-  const [users, setUsers] = useState([])
-  const [message, setMessage] = useState('Загрузка...')
+useEffect(() => {
+  const userId = localStorage.getItem('userId')
+  if (userId) {
+    setCurrentUserId(parseInt(userId))
+  }
+}, [])
 
-  useEffect(() => {
-    // Проверка подключения к бэкенду
-    api.healthCheck()
-      .then(() => setMessage('Бэкенд подключен!'))
-      .catch(() => setMessage('Бэкенд не отвечает'))
-    
-    // Получить пользователей
-    api.getUsers()
-      .then(response => setUsers(response.data))
-      .catch(err => console.error('Ошибка:', err))
-  }, [])
-
-  return (
-    <div style={{ padding: '20px' }}>
-      <h1>Swipe Match</h1>
-      <p>{message}</p>
-      
-      <h2>Пользователи в базе:</h2>
-      {users.length === 0 ? (
-        <p>Пока пусто</p>
-      ) : (
-        <ul>
-          {users.map(user => (
-            <li key={user.id}>
-              {user.username} ({user.age} лет)
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  )
+const loadCandidates = async () => {
+  try {
+    setLoading(true)
+    const data = await api.getCandidates(currentUserId, 10)
+    setCandidates(data)
+    setCurrentIndex(0)
+  } catch (error) {
+    console.error('Ошибка загрузки:', error)
+    setCandidates([])
+  } finally {
+    setLoading(false)
+  }
 }
-
-export default HomePage
+const handleLike = async (userId) => {
+  try {
+    const result = await api.makeSwipe(currentUserId, userId, true)
+    if (result.is_match) {
+      setMatch({ message: '🎉 Мэтч!', userId })
+      setTimeout(() => setMatch(null), 3000)
+    }
+    nextCard()
+  } catch (error) {
+    console.error('Ошибка свайпа:', error)
+    nextCard()
+  }
+}
