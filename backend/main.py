@@ -1,7 +1,3 @@
-# ==========================================
-# backend/main.py
-# ==========================================
-
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
@@ -13,23 +9,15 @@ import models
 import database
 import auth
 
-# ==========================================
-# СОЗДАНИЕ ТАБЛИЦ В БД
-# ==========================================
 models.Base.metadata.create_all(bind=database.engine)
 
-# ==========================================
-# НАСТРОЙКА FASTAPI
-# ==========================================
 app = FastAPI(
     title="Swipe Match API",
     description="API для приложения знакомств",
-    version="1.0.0"
+    version="1.1.0"
 )
 
-# ==========================================
-# CORS - ДОЛЖЕН БЫТЬ ПЕРВЫМ MIDDLEWARE!
-# ==========================================
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -37,16 +25,14 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "*"  # ← Разрешаем ВСЕ origin (для тестов)
+        "*"
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
 )
 
-# ==========================================
-# ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-# ==========================================
+
 def get_db():
     db = database.SessionLocal()
     try:
@@ -54,23 +40,18 @@ def get_db():
     finally:
         db.close()
 
-# ==========================================
-# БАЗОВЫЕ ЭНДПОИНТЫ
-# ==========================================
+
 @app.get("/")
 def read_root():
-    return {"message": "✅ Swipe Match API работает!", "status": "ok"}
+    return {"message": "Swipe Match API работает!", "status": "ok"}
 
 @app.get("/api/health")
 def health_check():
     return {"status": "ok", "database": "connected"}
 
-# ==========================================
-# API: АВТОРИЗАЦИЯ
-# ==========================================
+
 @app.post("/api/auth/register")
 def register(username: str, password: str, age: int, gender: str, bio: str = "", db: Session = Depends(database.get_db)):
-    """Регистрация нового пользователя"""
     
     existing_user = db.query(models.User).filter(models.User.username == username).first()
     if existing_user:
@@ -103,7 +84,6 @@ def register(username: str, password: str, age: int, gender: str, bio: str = "",
 
 @app.post("/api/auth/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
-    """Вход пользователя"""
     
     user = db.query(models.User).filter(models.User.username == form_data.username).first()
     
