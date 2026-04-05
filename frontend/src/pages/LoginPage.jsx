@@ -16,7 +16,7 @@ function LoginPage() {
 
     try {
       await api.login(username, password)
-      navigate('/')
+      window.location.href = '/'
     } catch (err) {
       setError(err.response?.data?.detail || 'Ошибка входа')
     } finally {
