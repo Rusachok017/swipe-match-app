@@ -35,11 +35,11 @@ def create_fake_users(db: Session, count=20):
             photo_url=f"https://i.pravatar.cc/150?img={random.randint(1, 50)}"
         )
         users.append(user)
-        print(f"✅ Создан пользователь: {first_name}_{i+1}")
+        print(f"Создан пользователь: {first_name}_{i+1}")
     
     db.add_all(users)
     db.commit()
-    print(f"\n🎉 Готово! Создано {len(users)} пользователей.")
+    print(f"\nГотово! Создано {len(users)} пользователей.")
 
 if __name__ == "__main__":
     db = database.SessionLocal()

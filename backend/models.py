@@ -1,13 +1,10 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from datetime import datetime  # ← Добавь эту строку!
+from datetime import datetime
 from enum import Enum 
 Base = declarative_base()
 
-class FilterType(str, Enum):
-    USER = "user"       
-    KEYWORD = "keyword"
 
 class User(Base):
     __tablename__ = "users"

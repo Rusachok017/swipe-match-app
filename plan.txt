@@ -13,16 +13,14 @@
      Git: настройка веток, .gitignore
 
 [2] База данных и Модели
-     Таблица Users (id, username, age, gender, bio, photo_url)
-     Таблица Swipes (swiper_id, swiped_id, is_like, created_at)
+     Таблица Users (id, username, age, gender, bio, photo_url, password, created_at)
+     Таблица Swipes (id, swiper_id, swiped_id, is_like, created_at)
      Таблицы Blacklist / Whitelist
      Скрипт для заполнения БД тестовыми данными (фейковые юзеры)
 
 [3] Бэкенд: API
      GET /candidates — выдача анкет 
-     POST /swipe — сохранение лайка/дизлайка
      POST /auth — регистрация и вход 
-     GET /profile — данные текущего пользователя
 
 [4] Фронтенд: Основа 
      Страница входа / регистрации
