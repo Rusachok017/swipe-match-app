@@ -1,4 +1,3 @@
-// frontend/src/pages/HomePage.jsx
 import React, { useState, useEffect } from 'react'
 import { api } from '../services/api'
 import SwipeCard from '../components/SwipeCard'

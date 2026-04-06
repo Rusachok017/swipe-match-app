@@ -72,7 +72,7 @@ def register(username: str, password: str, age: int, gender: str, bio: str = "",
     
     access_token = auth.create_access_token(
         data={"sub": new_user.username},
-        expires_delta=timedelta(minutes=30)
+        expires_delta=timedelta(minutes=300)
     )
     
     return {
@@ -92,7 +92,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     
     access_token = auth.create_access_token(
         data={"sub": user.username},
-        expires_delta=timedelta(minutes=30)
+        expires_delta=timedelta(minutes=300)
     )
     
     return {
