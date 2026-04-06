@@ -14,7 +14,7 @@ models.Base.metadata.create_all(bind=database.engine)
 app = FastAPI(
     title="Swipe Match API",
     description="API для приложения знакомств",
-    version="1.1.0"
+    version="1.1.1"
 )
 
 
