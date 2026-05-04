@@ -17,6 +17,8 @@ class User(Base):
     photo_url = Column(String(255), nullable=True)
     password = Column(String(255), nullable=True) 
     created_at = Column(DateTime, default=datetime.utcnow)
+    avatar_file = Column(String(255), nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class Swipe(Base):
     __tablename__ = "swipes"
@@ -27,3 +29,18 @@ class Swipe(Base):
     is_like = Column(Boolean, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+class Blacklist(Base):
+    __tablename__ = "blacklist"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    keyword = Column(String(50), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Whitelist(Base):
+    __tablename__ = "whitelist"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    keyword = Column(String(50), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)

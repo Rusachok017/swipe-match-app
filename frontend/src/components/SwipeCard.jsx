@@ -14,9 +14,12 @@ function SwipeCard({ user, onLike, onDislike }) {
     <div style={styles.card}>
       {/* Фото пользователя */}
       <img 
-        src={user.photo_url || 'https://i.pravatar.cc/150?img=1'} 
+        src={user.photo_url?.startsWith('http') ? user.photo_url : `http://127.0.0.1:8001${user.photo_url}`}
         alt={user.username}
         style={styles.photo}
+        onError={(e) => {
+          e.target.src = `https://i.pravatar.cc/150?img=${user.id % 50}`
+  }}
       />
       
       {/* Информация */}

@@ -7,29 +7,37 @@ function HomePage() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [loading, setLoading] = useState(true)
   const [match, setMatch] = useState(null)
-  const [currentUserId, setCurrentUserId] = useState(1)
+  const [currentUserId, setCurrentUserId] = useState(null) 
 
-  // Получаем ID текущего пользователя при загрузке
   useEffect(() => {
     const userId = localStorage.getItem('userId')
+    console.log('🔍 UserID из localStorage:', userId)
+    
     if (userId) {
       setCurrentUserId(parseInt(userId))
+    } else {
+      console.error('❌ userId не найден в localStorage!')
     }
   }, [])
 
-  // Загрузка кандидатов при старте
   useEffect(() => {
-    loadCandidates()
-  }, [currentUserId])
+    if (currentUserId) {  
+      console.log('✅ Загружаем кандидатов для user_id:', currentUserId)
+      loadCandidates()
+    }
+  }, [currentUserId])  
 
   const loadCandidates = async () => {
     try {
       setLoading(true)
+      console.log('📡 Запрос кандидатов для user_id:', currentUserId)
       const data = await api.getCandidates(currentUserId, 10)
+      console.log('📥 Получено кандидатов:', data.length)
+      
       setCandidates(data)
       setCurrentIndex(0)
     } catch (error) {
-      console.error('Ошибка загрузки:', error)
+      console.error('❌ Ошибка загрузки:', error)
       setCandidates([])
     } finally {
       setLoading(false)
@@ -66,12 +74,15 @@ function HomePage() {
     if (currentIndex < candidates.length - 1) {
       setCurrentIndex(currentIndex + 1)
     } else {
-      // Загрузить ещё кандидатов
       loadCandidates()
     }
   }
 
   const currentUser = candidates[currentIndex]
+
+  if (!currentUserId) {
+    return <div style={styles.loading}>Загрузка...</div> 
+  }
 
   return (
     <div style={styles.container}>
@@ -100,7 +111,6 @@ function HomePage() {
   )
 }
 
-// Стили
 const styles = {
   container: {
     minHeight: '100vh',

@@ -4,6 +4,8 @@ import { api } from './services/api'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage.jsx'
+import ProfilePage from './pages/ProfilePage'
+import EditProfilePage from './pages/EditProfilePage'
 
 function App() {
   const [isAuth, setIsAuth] = useState(false)
@@ -38,7 +40,7 @@ function App() {
         {isAuth && (
           <nav style={styles.nav}>
             <Link to="/" style={styles.link}>🏠 Главная</Link>
-            <span style={styles.username}>👤 {user?.username}</span>
+            <Link to="/profile" style={styles.link}>👤 Профиль</Link>
             <button onClick={handleLogout} style={styles.logoutBtn}>Выйти</button>
           </nav>
         )}
@@ -46,6 +48,8 @@ function App() {
           <Route path="/login" element={isAuth ? <Navigate to="/" /> : <LoginPage />} />
           <Route path="/register" element={isAuth ? <Navigate to="/" /> : <RegisterPage />} />
           <Route path="/" element={isAuth ? <HomePage /> : <Navigate to="/login" />} />
+          <Route path="/profile" element={isAuth ? <ProfilePage /> : <Navigate to="/login" />} />
+          <Route path="/profile/edit" element={isAuth ? <EditProfilePage /> : <Navigate to="/login" />} />
         </Routes>
       </div>
     </Router>

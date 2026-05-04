@@ -79,9 +79,58 @@ export const api = {
     const response = await apiClient.get('/users')
     return response.data
   },
+
+  getProfile: async () => {
+    const response = await apiClient.get('/profile')
+    return response.data
+  },
   
+  updateProfile: async (data) => {
+    const response = await apiClient.put('/profile', null, {
+      params: data
+    })
+    return response.data
+  },
+  
+  uploadAvatar: async (file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await apiClient.post('/profile/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    return response.data
+  },
+  
+  deleteAvatar: async () => {
+    const response = await apiClient.delete('/profile/avatar')
+    return response.data
+  },
+  
+  getFilters: async () => {
+    const response = await apiClient.get('/profile/keywords')
+    return response.data
+  },
+  
+  setFilterStatus: async (keyword, status) => {
+    const response = await apiClient.post('/profile/keywords/set', null, {
+      params: { keyword, status }
+    })
+    return response.data
+  },
+
   healthCheck: async () => {
     const response = await apiClient.get('/health')
+    return response.data
+  },
+
+  getFilters: async () => {
+    const response = await apiClient.get('/profile/keywords')
+    return response.data
+  },
+  setFilterStatus: async (keyword, status) => {
+    const response = await apiClient.post('/profile/keywords/set', null, {
+      params: { keyword, status }
+    })
     return response.data
   }
 }
