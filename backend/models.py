@@ -3,8 +3,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from enum import Enum 
-Base = declarative_base()
 
+Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
@@ -19,6 +19,10 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     avatar_file = Column(String(255), nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    email = Column(String(100), unique=True, index=True, nullable=True)
+    email_2fa_enabled = Column(Boolean, default=False)
+    email_2fa_code = Column(String(6), nullable=True)
+    email_2fa_expires = Column(DateTime, nullable=True)
 
 class Swipe(Base):
     __tablename__ = "swipes"

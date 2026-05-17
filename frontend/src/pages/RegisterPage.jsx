@@ -31,7 +31,15 @@ function RegisterPage() {
         formData.gender,
         formData.bio
       )
-      navigate('/')
+      
+      const status = await api.check2FAStatus()
+      
+      if (!status.email_2fa_enabled) {
+        navigate('/profile?setup2fa=true')
+      } else {
+        navigate('/')
+      }
+      
     } catch (err) {
       setError(err.response?.data?.detail || 'Ошибка регистрации')
     } finally {

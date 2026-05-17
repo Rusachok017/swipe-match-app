@@ -1,4 +1,3 @@
-// frontend/src/pages/EditProfilePage.jsx
 import React, { useState, useEffect } from 'react'
 import { api } from '../services/api'
 import { useNavigate } from 'react-router-dom'
@@ -20,7 +19,6 @@ function EditProfilePage() {
   const [avatarPreview, setAvatarPreview] = useState(null)
   const [avatarFile, setAvatarFile] = useState(null)
 
-  // Загрузка текущих данных
   useEffect(() => {
     loadProfile()
   }, [])
@@ -251,7 +249,6 @@ function EditProfilePage() {
   )
 }
 
-// Стили
 const styles = {
   container: {
     minHeight: '100vh',

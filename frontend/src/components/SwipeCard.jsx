@@ -12,17 +12,15 @@ function SwipeCard({ user, onLike, onDislike }) {
 
   return (
     <div style={styles.card}>
-      {/* Фото пользователя */}
       <img 
         src={user.photo_url?.startsWith('http') ? user.photo_url : `http://127.0.0.1:8001${user.photo_url}`}
         alt={user.username}
         style={styles.photo}
         onError={(e) => {
           e.target.src = `https://i.pravatar.cc/150?img=${user.id % 50}`
-  }}
+        }}
       />
       
-      {/* Информация */}
       <div style={styles.info}>
         <h2 style={styles.name}>
           {user.username}, {user.age}
@@ -30,7 +28,6 @@ function SwipeCard({ user, onLike, onDislike }) {
         <p style={styles.bio}>{user.bio || 'Нет био'}</p>
       </div>
       
-      {/* Кнопки */}
       <div style={styles.buttons}>
         <button 
           onClick={() => onDislike(user.id)}
@@ -50,7 +47,6 @@ function SwipeCard({ user, onLike, onDislike }) {
   )
 }
 
-// Стили
 const styles = {
   card: {
     maxWidth: '400px',

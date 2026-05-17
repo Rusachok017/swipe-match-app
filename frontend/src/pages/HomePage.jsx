@@ -11,7 +11,7 @@ function HomePage() {
 
   useEffect(() => {
     const userId = localStorage.getItem('userId')
-    console.log('🔍 UserID из localStorage:', userId)
+    console.log('UserID из localStorage:', userId)
     
     if (userId) {
       setCurrentUserId(parseInt(userId))
@@ -30,9 +30,9 @@ function HomePage() {
   const loadCandidates = async () => {
     try {
       setLoading(true)
-      console.log('📡 Запрос кандидатов для user_id:', currentUserId)
+      console.log('Запрос кандидатов для user_id:', currentUserId)
       const data = await api.getCandidates(currentUserId, 10)
-      console.log('📥 Получено кандидатов:', data.length)
+      console.log('Получено кандидатов:', data.length)
       
       setCandidates(data)
       setCurrentIndex(0)
@@ -49,8 +49,12 @@ function HomePage() {
       const result = await api.makeSwipe(currentUserId, userId, true)
       
       if (result.is_match) {
-        setMatch({ message: '🎉 Мэтч!', userId })
-        setTimeout(() => setMatch(null), 3000)
+        setMatch({ 
+          message: '🎉 Мэтч!', 
+          userId,
+          emailSent: result.email_sent 
+        })
+        setTimeout(() => setMatch(null), 3000) 
       }
       
       nextCard()
@@ -90,10 +94,20 @@ function HomePage() {
       
       {match && (
         <div style={styles.matchPopup}>
-          {match.message}
+          <div style={styles.matchTitle}>{match.message}</div>
+          {match.emailSent && (
+            <div style={styles.matchEmail}>
+              📧 Email с контактами отправлен вам на почту!
+            </div>
+          )}
+          {!match.emailSent && (
+            <div style={styles.matchNoEmail}>
+              ⚠️ 2FA должна быть включена у обоих юзеров для получения контактов
+            </div>
+          )}
         </div>
       )}
-      
+
       {loading ? (
         <div style={styles.loading}>Загрузка...</div>
       ) : (
@@ -147,6 +161,38 @@ const styles = {
     color: '#666',
     marginTop: '20px',
     fontSize: '16px'
+  },
+  matchPopup: {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    backgroundColor: '#ff6b6b',
+    color: 'white',
+    padding: '30px 60px',
+    borderRadius: '20px',
+    fontSize: '32px',
+    fontWeight: 'bold',
+    zIndex: 1000,
+    animation: 'pulse 0.5s ease-in-out',
+    textAlign: 'center'
+  },
+  matchTitle: {
+    marginBottom: '15px'
+  },
+  matchEmail: {
+    fontSize: '16px',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    padding: '10px 20px',
+    borderRadius: '10px',
+    fontWeight: 'normal'
+  },
+  matchNoEmail: {
+    fontSize: '14px',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    padding: '10px 20px',
+    borderRadius: '10px',
+    fontWeight: 'normal'
   }
 }
 
